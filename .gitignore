@@ -12,3 +12,7 @@
 vignettes/*.html
 vignettes/*.pdf
 .Rproj.user
+
+# Project-specific files
+outputs/
+data/srdb-20150826a/srdb-data.csv.gz
