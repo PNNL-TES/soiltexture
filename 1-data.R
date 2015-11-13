@@ -13,9 +13,11 @@ library(magrittr)
 # -----------------------------------------------------------------------------
 # Extract raster data and match with arbitrary lon/lat pairs
 extract_rasterdata <- function(datadir, filepattern, lonlat) {
+  printlog(SEPARATOR)
   printlog("Looking for files in", datadir)
   files <- list.files(datadir, pattern = filepattern)
-  outdata <- matrix(NA_real_, nrow = nrow(lonlat), ncol = length(files))
+  outdata <- matrix(NA_real_, nrow = nrow(lonlat), ncol = length(files)) %>%
+    as.data.frame()
   print_dims(outdata)
   
   for(i in seq_along(files)) {
@@ -40,14 +42,16 @@ extract_rasterdata <- function(datadir, filepattern, lonlat) {
     fqof <- paste0(file.path(outputdir(), varname), ".png")
     png(fqof, width = 1000, height = 500)
     plot(d, main = varname)
-    points(lonlat[,1], lonlat[,2])
+    rug(lonlat[,1])
+    rug(lonlat[,2], side = 2)
+    points(lonlat[,1], lonlat[,2], pch = ".")
     dev.off()
     
     # Use raster::extract(raster object, point list)
     printlog("Extracting...")
     rd <- raster::extract(d, lonlat)
     printlog("Extracted", length(rd), "raster data")
-    outdata[i] <- rd
+    outdata[,i] <- rd
     file.remove(tf)
   }
   outdata
