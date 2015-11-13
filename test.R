@@ -9,27 +9,32 @@ library(raster)
 
 # Load the soilgrid1km files one by one
 SOILSDATA <- "~/Data/soilgrids1km/"
+FILEPATTERN <- "_02_apr_2014.tif.gz"
 
-files <- list.files(SOILSDATA, pattern = "*.tif.gz")
+files <- list.files(SOILSDATA, pattern = FILEPATTERN)
 
 for(fn in files) {
+
+  print(fn)
+  
+  # get variable name from filename
+  varname <- gsub(FILEPATTERN, "", fn)
   
   #fn <- "BLD_sd1_M_02_apr_2014.tif.gz"
   fqfn <- file.path(SOILSDATA, fn)
   
-  # get variable name from filename
-  varname <- paste(unlist(strsplit(fn, "_"))[1:3], collapse="_")
-  
   
   # gunzip the file to a temporary file
-  tf <- tempfile()
-  gunzip(fqfn, destname = tf)
+  tf <- gunzip(fqfn, remove = FALSE, temporary = TRUE, overwrite = TRUE)
   
   # load into raster
-  
   d <- raster(tf)
   print(d)
-  plot(d)
+  
+  fqof <- paste0(file.path("output", varname), ".png")
+  png(fqof, width = 640, height = 480)
+  plot(d, main = varname)
+  dev.off()
   
   # Use raster::extract(raster object, point list)
   
