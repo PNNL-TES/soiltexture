@@ -5,10 +5,9 @@ source("0-functions.R")
 
 SCRIPTNAME  	<- "1-data.R"
 
-library(R.utils)
-library(raster)
-library(magrittr)
-
+library(R.utils)  # 2.1.0
+library(raster)   # 2.4-20
+library(magrittr) # 1.5
 
 # -----------------------------------------------------------------------------
 # Extract raster data and match with arbitrary lon/lat pairs
@@ -61,7 +60,7 @@ extract_rasterdata <- function(datadir, filepattern, lonlat) {
 # ==============================================================================
 # Main 
 
-openlog(file.path(outputdir(), paste0(SCRIPTNAME, ".log.txt")), sink = TRUE)
+openlog(file.path(outputdir(), paste0(SCRIPTNAME, ".log")), sink = TRUE)
 
 printlog("Welcome to", SCRIPTNAME)
 
@@ -69,7 +68,15 @@ printlog("Welcome to", SCRIPTNAME)
 printlog("Loading SRDB data...")
 srdb <- gzfile("data/srdb-20150826a/srdb-data.csv.gz") %>%
   read.csv() %>%
-  subset(select = c(Record_number, Longitude, Latitude))
+  subset(select = c(Record_number, 
+                    Longitude, Latitude, Elevation,
+                    Manipulation,
+                    Biome, Ecosystem_type, Ecosystem_state, Leaf_habit,
+                    Soil_type, Soil_drainage, Soil_BD, Soil_CN, Soil_sandsiltclay,
+                    MAT, MAP,
+                    Meas_method,
+                    Rs_annual, Rh_annual, Ra_annual,
+                    R10, Q10_0_10, Q10_5_15, Q10_10_20))
 lonlat <- srdb %>%
   subset(select = c(Longitude, Latitude))
 
@@ -77,18 +84,31 @@ lonlat <- srdb %>%
 soildata <- extract_rasterdata(datadir = "~/Data/soilgrids1km/",
                                filepattern = "_02_apr_2014.tif.gz", 
                                lonlat = lonlat)
-save_data(soildata)
+save_data(soildata, scriptfolder = FALSE)
 
 # Precipitation climatology from WorldClim
 precipdata <- extract_rasterdata(datadir = "~/Data/WorldClim/prec_30s_bil/",
                                  filepattern = ".bil.gz", 
                                  lonlat = lonlat)
-save_data(precipdata)
+precipdata$prec <- rowSums(precipdata)
+save_data(precipdata, scriptfolder = FALSE)
 
 # Temperature climatology from WorldClim
 tempdata <- extract_rasterdata(datadir = "~/Data/WorldClim/tmean_30s_bil/",
                                filepattern = ".bil.gz", 
                                lonlat = lonlat)
-save_data(tempdata)
+tempdata <- tempdata / 10.0   # WorldClim temperature is *10
+tempdata$tmean <- rowMeans(tempdata)
+save_data(tempdata, scriptfolder = FALSE)
+
+# FAO WRB classes (from soilgrid1km README file)
+faowrb <- read_csv("FAO_WRB.csv", datadir = INPUT_DIR)
+
+printlog("Combining data...")
+srdb <- cbind(srdb, soildata) %>% 
+  cbind(precipdata) %>% 
+  cbind(tempdata) %>%
+  merge(faowrb, by = "TAXGWRB")
+save_data(srdb, scriptfolder = FALSE)
 
 closelog()

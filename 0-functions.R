@@ -12,7 +12,7 @@ OUTPUT_DIR		<- "outputs/"
 SEPARATOR		<- "-------------------"
 
 # -----------------------------------------------------------------------------
-# Print dimensions of data frame
+# Print dimensions of data frame or matrix
 print_dims <- function(d, dname=deparse(substitute(d))) {
   stopifnot(is.data.frame(d) | is.matrix(d))
   printlog(dname, "rows =", nrow(d), "cols =", ncol(d))
