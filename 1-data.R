@@ -23,13 +23,14 @@ extract_rasterdata <- function(datadir, filepattern, lonlat) {
   for(i in seq_along(files)) {
     
     fn <- files[i]
-    printlog("Expanding", fn)
+    printlog(fn)
     
     # get variable name from filename
     varname <- gsub(filepattern, "", fn)
     names(outdata)[i] <- varname
     
     # gunzip (from R.utils) the file to a temporary file
+    printlog("Decompressing...")
     fqfn <- file.path(datadir, fn)
     tf <- gunzip(fqfn, remove = FALSE, overwrite = TRUE)
     
@@ -74,17 +75,20 @@ lonlat <- srdb %>%
 
 # Load the soilgrid1km files one by one
 soildata <- extract_rasterdata(datadir = "~/Data/soilgrids1km/",
-                               filepattern = "_02_apr_2014.tif.gz", lonlat)
+                               filepattern = "_02_apr_2014.tif.gz", 
+                               lonlat = lonlat)
 save_data(soildata)
 
 # Precipitation climatology from WorldClim
 precipdata <- extract_rasterdata(datadir = "~/Data/WorldClim/prec_30s_bil/",
-                                 filepattern = ".bil.gz", lonlat)
+                                 filepattern = ".bil.gz", 
+                                 lonlat = lonlat)
 save_data(precipdata)
 
 # Temperature climatology from WorldClim
 tempdata <- extract_rasterdata(datadir = "~/Data/WorldClim/tmean_30s_bil/",
-                                 filepattern = ".bil.gz", lonlat)
+                               filepattern = ".bil.gz", 
+                               lonlat = lonlat)
 save_data(tempdata)
 
 closelog()
