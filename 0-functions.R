@@ -88,6 +88,7 @@ if(!file.exists(OUTPUT_DIR)) {
 #    try(checkpoint(CHECKPOINTDATE)) # 'try' b/c errors w/o network (issue #171)
 library(ggplot2)
 theme_set(theme_bw())
+library(magrittr)
 # library(reshape2)
 # library(dplyr)
 # library(readr)

@@ -7,7 +7,6 @@ SCRIPTNAME  	<- "1-data.R"
 
 library(R.utils)  # 2.1.0
 library(raster)   # 2.4-20
-library(magrittr) # 1.5
 
 # -----------------------------------------------------------------------------
 # Extract raster data and match with arbitrary lon/lat pairs

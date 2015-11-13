@@ -1,4 +1,4 @@
-# Match up SRDB data with climate and soils data
+# Quality control - does data set make sense / look OK?
 # BBL November 13, 2015
 
 source("0-functions.R")
