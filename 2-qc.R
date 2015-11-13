@@ -55,11 +55,18 @@ p <- p + xlab("Inferred FAO WRB soil class") + ylab("Inferred 2 cm BD (g/cm3)")
 print(p)
 save_plot("qc_bd_class")
 
+p <- ggplot(srdb, aes(WRB_class, CLYPPT_sd1_M)) + geom_boxplot()
+p <- p + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+p <- p + xlab("Inferred FAO WRB soil class") + ylab("Inferred 2 cm clay (%)")
+print(p)
+save_plot("qc_clay_class")
+
 p <- ggplot(srdb, aes(Longitude, Latitude, color = WRB_class))
 p <- p + geom_point(aes(size = OCSTHA_M))
 p <- p + coord_equal() + theme(legend.position = "bottom")
 print(p)
 save_plot("qc_class")
+
 
 closelog()
 
