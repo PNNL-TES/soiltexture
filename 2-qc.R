@@ -68,5 +68,17 @@ print(p)
 save_plot("qc_class")
 
 
+# -----------------------------------------------------------------------------
+# Plot Rs_annual versus everything else
+nms <- names(srdb)
+for(i in seq_along(nms)) {
+  printlog("Plotting Rs_annual versus", nms[i])
+  title <- paste(i, nms[i], sep = "-")
+  p <- ggplot(srdb, aes_string(nms[i], "Rs_annual", color = nms[i])) 
+  p <- p + geom_smooth(fill=NA) + geom_jitter() + ggtitle(title) 
+  save_plot(pname = title, p = p)
+}
+
+
 closelog()
 

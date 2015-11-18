@@ -67,7 +67,7 @@ printlog("Welcome to", SCRIPTNAME)
 printlog("Loading SRDB data...")
 srdb <- gzfile("data/srdb-20150826a/srdb-data.csv.gz") %>%
   read.csv() %>%
-  subset(select = c(Record_number, 
+  subset(select = c(Record_number, Study_midyear,
                     Longitude, Latitude, Elevation,
                     Manipulation,
                     Biome, Ecosystem_type, Ecosystem_state, Leaf_habit,
@@ -76,8 +76,7 @@ srdb <- gzfile("data/srdb-20150826a/srdb-data.csv.gz") %>%
                     Meas_method,
                     Rs_annual, Rh_annual, Ra_annual,
                     R10, Q10_0_10, Q10_5_15, Q10_10_20))
-lonlat <- srdb %>%
-  subset(select = c(Longitude, Latitude))
+lonlat <- srdb[c("Longitude", "Latitude")]
 
 # Load the soilgrid1km files one by one
 soildata <- extract_rasterdata(datadir = "~/Data/soilgrids1km/",
@@ -100,6 +99,12 @@ tempdata <- tempdata / 10.0   # WorldClim temperature is *10
 tempdata$tmean <- rowMeans(tempdata)
 save_data(tempdata, scriptfolder = FALSE)
 
+# MODIS land cover data
+modisdata <- extract_rasterdata(datadir = "~/Data/MODIS_landcover/",
+                               filepattern = ".tif.gz", 
+                               lonlat = lonlat)
+save_data(modisdata, scriptfolder = FALSE)
+
 # FAO WRB classes (from soilgrid1km README file)
 faowrb <- read_csv("FAO_WRB.csv", datadir = INPUT_DIR)
 
@@ -107,6 +112,7 @@ printlog("Combining data...")
 srdb <- cbind(srdb, soildata) %>% 
   cbind(precipdata) %>% 
   cbind(tempdata) %>%
+  cbind(modisdata["LC_5min_global_2012"]) %>%   # TODO - just using 2012 data for now 
   merge(faowrb, by = "TAXGWRB")
 save_data(srdb, scriptfolder = FALSE)
 

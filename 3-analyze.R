@@ -17,7 +17,8 @@ printlog("Welcome to", SCRIPTNAME)
 
 srdb <- read_csv(SRDB, datadir = outputdir(scriptfolder = FALSE))
 
-indepvars <- grepl("tmean|prec|OCSTHA|PHIHOX|CLYPPT|BLD", names(srdb))
+printlog("Isolating predictors...")
+indepvars <- grepl("tmean|prec|OCSTHA|PHIHOX|CLYPPT|BLD|LC_5min_global", names(srdb))
 depvar <- "Rs_annual"
 vars <- grepl(depvar, names(srdb)) | indepvars
 s1 <- srdb[vars]
@@ -25,20 +26,19 @@ s1 <- srdb[vars]
 s2 <- s1[complete.cases(s1),]
 
 
-# "If the predictor variables are correlated, use cforest (party)with the
+# "If the predictor variables are correlated, use cforest (party) with the
 # default option controls = cforest_unbiased and the conditional permutation 
 # importance varimp(obj, conditional = TRUE)."
 # From https://epub.ub.uni-muenchen.de/9387/1/techreport.pdf
-
+printlog("Running cforest...")
 s2.cf <- cforest(Rs_annual ~ ., data = s2, control = cforest_unbiased())
 vi <- varimp(s2.cf) %>% sort()
 vi2 <- data.frame(var = factor(names(vi), levels = names(vi)), 
                   value = as.numeric(vi))
 p <- ggplot(vi2, aes(var, value)) + geom_bar(stat = 'identity')
 p <- p + theme(axis.text.x = element_text(angle = 90, hjust = 1))
-
-
-
+print(p)
+save_plot("cforest_varimp")
 
 closelog()
 
